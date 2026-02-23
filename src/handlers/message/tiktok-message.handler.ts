@@ -27,12 +27,12 @@ export class TikTokMessageHandler implements IMessageHandler {
 
     try {
       const arhive = await this.memoryService.findByUrl(url, ctx.chatId);
-      
+
       if (arhive) {
         const fileId = arhive.getFileId.toString();
         await statusMessage.delete();
         const sentMessage = await ctx.sendVideo(fileId, {
-            reply_markup: createVideoKeyboard(0),
+          reply_markup: createVideoKeyboard(0),
         });
         const updatedKeyboard = createVideoKeyboard(sentMessage.id);
         await sentMessage.editReplyMarkup(updatedKeyboard);
@@ -42,7 +42,7 @@ export class TikTokMessageHandler implements IMessageHandler {
       const file = await this.videoService.download(url);
 
       if (!file) {
-        await statusMessage.delete().catch(() => {});
+        await statusMessage.delete().catch(() => { });
         await ctx.reply("Не вдалося завантажити відео");
         return;
       }
@@ -72,7 +72,7 @@ export class TikTokMessageHandler implements IMessageHandler {
     const keyboard = createVideoKeyboard(0);
 
     const sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
-      reply_markup: keyboard,
+      reply_markup: keyboard, caption: `Опять цей ${ctx.chat.username} відправив тікіток\n`,
     });
 
     const fileId = sentMessage.video?.fileId;

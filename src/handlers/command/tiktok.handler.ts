@@ -33,13 +33,13 @@ export class TikTokCommandHandler implements ICommandHandler {
 
     try {
       const arhive = await this.memoryService.findByUrl(url, ctx.chatId);
-      
+
       if (arhive) {
         const fileId = arhive.getFileId.toString();
-        await statusMessage.delete().catch(() => {});
+        await statusMessage.delete().catch(() => { });
         const sentMessage = await ctx.sendVideo(fileId, {
-            reply_markup: createVideoKeyboard(0),
-            caption: captionText,
+          reply_markup: createVideoKeyboard(0),
+          caption: captionText,
         });
         const updatedKeyboard = createVideoKeyboard(sentMessage.id);
         await sentMessage.editReplyMarkup(updatedKeyboard);
@@ -49,7 +49,7 @@ export class TikTokCommandHandler implements ICommandHandler {
       const file = await this.videoService.download(url);
 
       if (!file) {
-        await statusMessage.delete().catch(() => {});
+        await statusMessage.delete().catch(() => { });
         await ctx.reply("Не вдалося завантажити відео");
         return;
       }
@@ -61,7 +61,7 @@ export class TikTokCommandHandler implements ICommandHandler {
       }
     } catch (error) {
       console.error(error);
-      await statusMessage.delete().catch(() => {});
+      await statusMessage.delete().catch(() => { });
       await ctx.reply("Сталася помилка при завантаженні відео");
     }
   }
@@ -87,13 +87,13 @@ export class TikTokCommandHandler implements ICommandHandler {
     const { messageId, chatId } = { messageId: ctx.id, chatId: ctx.chatId };
 
     const buffer = await readFile(file);
-    await statusMessage.delete().catch(() => {});
+    await statusMessage.delete().catch(() => { });
 
     const keyboard = createVideoKeyboard(0);
 
     const sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
       reply_markup: keyboard,
-      caption: caption,
+      caption: `Опять цей ${ctx.chat.username} відправив тікіток\n ${caption}`,
     });
 
     const fileId = sentMessage.video?.fileId;
