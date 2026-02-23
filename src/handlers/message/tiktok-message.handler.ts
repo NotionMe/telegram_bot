@@ -73,7 +73,7 @@ export class TikTokMessageHandler implements IMessageHandler {
 
     const sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
       reply_markup: keyboard,
-      caption: `Опять цей ${ctx.chat.username} відправив тікіток\n`,
+      caption: `Опять цей ${ctx.from?.username} відправив тікіток\n`,
     });
 
     const fileId = sentMessage.video?.fileId;

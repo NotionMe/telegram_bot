@@ -93,7 +93,7 @@ export class TikTokCommandHandler implements ICommandHandler {
 
     const sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
       reply_markup: keyboard,
-      caption: `Опять цей ${ctx.chat.username} відправив тікіток\n ${caption}`,
+      caption: `Опять цей ${ctx.from?.username} відправив тікіток\n ${caption}`,
     });
 
     const fileId = sentMessage.video?.fileId;
