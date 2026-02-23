@@ -4,7 +4,6 @@ const container = new Container();
 const controller = container.getController();
 const bot = container.getBot();
 
-// Graceful shutdown
 const signals = ["SIGINT", "SIGTERM"];
 
 for (const signal of signals) {
@@ -23,6 +22,5 @@ process.on("unhandledRejection", (error) => {
   console.error("Unhandled rejection:", error);
 });
 
-// Register routes and start bot
 controller.registerRoutes();
 await controller.start();

@@ -9,8 +9,7 @@
     "@gramio/files": "^0.3.0",
     "env-var": "^7.5.0",
     "gramio": "^0.4.10",
-    "tsx": "^4.20.5",
-    "ytdlp-nodejs": "^3.4.4"
+    "tsx": "^4.20.5"
   },
   "devDependencies": {
     "@types/node": "^24.3.1",

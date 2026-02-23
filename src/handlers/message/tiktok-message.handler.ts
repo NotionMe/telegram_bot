@@ -26,16 +26,34 @@ export class TikTokMessageHandler implements IMessageHandler {
     ctx.delete(ctx.id);
 
     try {
+      const arhive = await this.memoryService.findByUrl(url, ctx.chatId);
+      
+      if (arhive) {
+        const fileId = arhive.getFileId.toString();
+        await statusMessage.delete();
+        const sentMessage = await ctx.sendVideo(fileId, {
+            reply_markup: createVideoKeyboard(0),
+        });
+        const updatedKeyboard = createVideoKeyboard(sentMessage.id);
+        await sentMessage.editReplyMarkup(updatedKeyboard);
+        return;
+      }
+
       const file = await this.videoService.download(url);
 
       if (!file) {
+        await statusMessage.delete().catch(() => {});
         await ctx.reply("Не вдалося завантажити відео");
         return;
       }
 
-      await this.sendVideo(ctx, statusMessage, file, url);
-      await unlink(file);
+      try {
+        await this.sendVideo(ctx, statusMessage, file, url);
+      } finally {
+        await unlink(file).catch(err => console.error("Помилка видалення файлу:", err));
+      }
     } catch (error) {
+      console.error(error);
       await ctx.reply("Сталася помилка при обробці відео");
     }
   }
@@ -46,8 +64,6 @@ export class TikTokMessageHandler implements IMessageHandler {
     file: string,
     url: string,
   ): Promise<void> {
-
-
     const { messageId, chatId } = { messageId: ctx.id, chatId: ctx.chatId };
 
     const buffer = await readFile(file);
@@ -55,18 +71,9 @@ export class TikTokMessageHandler implements IMessageHandler {
 
     const keyboard = createVideoKeyboard(0);
 
-    const arhive = await this.memoryService.findByUrl(url, chatId);
-
-    let sentMessage;
-
-    if (arhive) {
-      const fileId = arhive.getFileId.toString();
-      sentMessage = await ctx.sendVideo(fileId);
-    } else {
-      sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
-        reply_markup: keyboard,
-      });
-    }
+    const sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
+      reply_markup: keyboard,
+    });
 
     const fileId = sentMessage.video?.fileId;
 

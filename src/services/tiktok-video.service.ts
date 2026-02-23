@@ -1,22 +1,34 @@
-import { YtDlp } from "ytdlp-nodejs";
 import { IVideoService } from "../interfaces/video-service.interface";
+import { exec } from "child_process";
+import { promisify } from "util";
+import { randomUUID } from "crypto";
+import { join } from "path";
+import { stat } from "fs/promises";
+
+const execAsync = promisify(exec);
 
 export class TikTokVideoService implements IVideoService {
-  private ytdlp = new YtDlp();
-
   async download(url: string): Promise<string | null> {
     if (!url.trim()) return null;
 
     try {
-      const result = await this.ytdlp
-        .download(url)
-        .quality("best")
-        .type("mp4")
-        .run();
+      const fileName = `${randomUUID()}.mp4`;
+      const filePath = join("/tmp", fileName);
 
-      return result.filePaths[0] ?? null;
-    } catch (error) {
-      console.error("Download error:", error);
+      const command = `yt-dlp --no-warnings --no-playlist -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best" -o "${filePath}" "${url}"`;
+
+      console.log(`Починаємо завантаження: ${url}`);
+      await execAsync(command);
+
+      const fileStats = await stat(filePath);
+      if (fileStats.size === 0) {
+        throw new Error("Файл порожній");
+      }
+
+      console.log(`Відео завантажено успішно: ${filePath}`);
+      return filePath;
+    } catch (error: any) {
+      console.error("Помилка завантаження yt-dlp:", error?.message || error);
       return null;
     }
   }

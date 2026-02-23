@@ -14,12 +14,10 @@ export class BotController {
   ) {}
 
   registerRoutes(): void {
-    // Register command handlers
     for (const handler of this.commandHandlers) {
       this.bot.command(handler.command, (ctx) => handler.handle(ctx));
     }
 
-    // Register message handlers
     this.bot.on("message", async (ctx) => {
       for (const handler of this.messageHandlers) {
         if (handler.canHandle(ctx)) {
@@ -29,7 +27,6 @@ export class BotController {
       }
     });
 
-    // Register callback handlers
     this.bot.on("callback_query", async (ctx) => {
       if (this.likeHandler.canHandle(ctx)) {
         await this.likeHandler.handle(ctx);

@@ -16,6 +16,8 @@ export class TikTokCommandHandler implements ICommandHandler {
 
   async handle(ctx: MessageContext<Bot>): Promise<void> {
     const url = this.extractUrl(ctx.text);
+    const [url2, ...otherArgs] = ctx.text?.replace(/^\/tiktok\s*/, "").trim().split(" ") ?? [];
+    const captionText = otherArgs.join(" ") || undefined;
 
     if (!url) {
       await ctx.send("Ви не передали URL TikTok!");
@@ -30,16 +32,36 @@ export class TikTokCommandHandler implements ICommandHandler {
     const statusMessage = await ctx.send("Завантаження відео...");
 
     try {
+      const arhive = await this.memoryService.findByUrl(url, ctx.chatId);
+      
+      if (arhive) {
+        const fileId = arhive.getFileId.toString();
+        await statusMessage.delete().catch(() => {});
+        const sentMessage = await ctx.sendVideo(fileId, {
+            reply_markup: createVideoKeyboard(0),
+            caption: captionText,
+        });
+        const updatedKeyboard = createVideoKeyboard(sentMessage.id);
+        await sentMessage.editReplyMarkup(updatedKeyboard);
+        return;
+      }
+
       const file = await this.videoService.download(url);
 
       if (!file) {
+        await statusMessage.delete().catch(() => {});
         await ctx.reply("Не вдалося завантажити відео");
         return;
       }
 
-      await this.sendVideo(ctx, statusMessage, file, url);
-      await unlink(file);
+      try {
+        await this.sendVideo(ctx, statusMessage, file, url, captionText);
+      } finally {
+        await unlink(file).catch(err => console.error("Помилка видалення файлу:", err));
+      }
     } catch (error) {
+      console.error(error);
+      await statusMessage.delete().catch(() => {});
       await ctx.reply("Сталася помилка при завантаженні відео");
     }
   }
@@ -60,31 +82,19 @@ export class TikTokCommandHandler implements ICommandHandler {
     statusMessage: { delete(): Promise<unknown> },
     file: string,
     url: string,
+    caption?: string
   ): Promise<void> {
-
-
     const { messageId, chatId } = { messageId: ctx.id, chatId: ctx.chatId };
 
     const buffer = await readFile(file);
-    await statusMessage.delete();
+    await statusMessage.delete().catch(() => {});
 
     const keyboard = createVideoKeyboard(0);
 
-    const arhive = await this.memoryService.findByUrl(url, chatId);
-
-    let sentMessage;
-
-    const [url2, ...otherArgs] = ctx.text?.replace(/^\/tiktok\s*/, "").trim().split(" ") ?? [];
-
-    if (arhive) {
-      const fileId = arhive.getFileId.toString();
-      sentMessage = await ctx.sendVideo(fileId);
-    } else {
-      sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
-        reply_markup: keyboard,
-        caption: otherArgs.toString(),
-      });
-    }
+    const sentMessage = await ctx.sendVideo(MediaUpload.buffer(buffer, file), {
+      reply_markup: keyboard,
+      caption: caption,
+    });
 
     const fileId = sentMessage.video?.fileId;
 

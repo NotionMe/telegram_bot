@@ -1,22 +1,18 @@
 import { VideoRecord } from "../model/video.record";
 import { IMemoryRepository } from "../interfaces/memory-repository.interface";
 
-// Singleton array for memory storage
 const globalMemory: VideoRecord[] = [];
 
 export class MemoryRepository implements IMemoryRepository {
   async save(videoRecord: VideoRecord): Promise<boolean> {
     try {
-      // Check if it already exists
       const existingIndex = globalMemory.findIndex(
         (m) => m.getUrl === videoRecord.getUrl && m.getChatId === videoRecord.getChatId
       );
 
       if (existingIndex >= 0) {
-        // Update existing record
         globalMemory[existingIndex] = videoRecord;
       } else {
-        // Add new record
         globalMemory.push(videoRecord);
       }
       return true;
