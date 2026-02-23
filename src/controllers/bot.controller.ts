@@ -14,10 +14,12 @@ export class BotController {
   ) {}
 
   registerRoutes(): void {
+    // Register command handlers
     for (const handler of this.commandHandlers) {
       this.bot.command(handler.command, (ctx) => handler.handle(ctx));
     }
 
+    // Register message handlers
     this.bot.on("message", async (ctx) => {
       for (const handler of this.messageHandlers) {
         if (handler.canHandle(ctx)) {
@@ -27,6 +29,7 @@ export class BotController {
       }
     });
 
+    // Register callback handlers
     this.bot.on("callback_query", async (ctx) => {
       if (this.likeHandler.canHandle(ctx)) {
         await this.likeHandler.handle(ctx);
@@ -41,8 +44,17 @@ export class BotController {
   }
 
   async start(): Promise<void> {
-    await this.bot.start();
-    console.log("🤖 TikTok Бот успішно запущений!");
+    try {
+        await this.bot.start();
+        console.log("🤖 TikTok Бот успішно запущений!");
+    } catch (e: any) {
+        if (e?.message?.includes("Conflict: terminated by other getUpdates request")) {
+            console.error("Conflict detected: Another instance is running. Shutting down...");
+            process.exit(1);
+        } else {
+            throw e;
+        }
+    }
   }
 
   async stop(): Promise<void> {
