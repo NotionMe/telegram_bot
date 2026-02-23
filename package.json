@@ -9,7 +9,8 @@
     "@gramio/files": "^0.3.0",
     "env-var": "^7.5.0",
     "gramio": "^0.4.10",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "yt-dlp-exec": "^1.0.2"
   },
   "devDependencies": {
     "@types/node": "^24.3.1",
