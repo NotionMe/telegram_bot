@@ -1,0 +1,18 @@
+# Ігноруємо файли при збиранні образу
+node_modules/
+dist/
+build/
+.env
+.env.*
+*.sqlite
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+logs/
+*.log
+coverage/
+Dockerfile
+.dockerignore
+.git/
+.github/

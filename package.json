@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx tsx watch --env-file .env src/index.ts",
-    "start": "NODE_ENV=production npx tsx --env-file .env --env-file .env.production src/index.ts"
+    "start": "NODE_ENV=production npx tsx src/index.ts"
   },
   "dependencies": {
     "@gramio/files": "^0.3.0",
