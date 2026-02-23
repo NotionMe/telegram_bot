@@ -1,0 +1,37 @@
+node_modules/
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Local data / Databases
+*.sqlite
+*.json
+memory.json
+votes.json
+!package.json
+!package-lock.json
+!tsconfig.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Coverage
+coverage/
